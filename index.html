@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>D&D Parser – AI Resume Parser</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+  <!-- AOS Animation Library -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+  <style>
+    /* === RESET & BASE === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8fafc;
+      color: #374151;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    img { max-width: 100%; display: block; }
+    a { text-decoration: none; color: inherit; }
+
+    /* === TYPOGRAPHY === */
+    h1, h2, h3, h4 { font-family: 'Playfair Display', serif; color: #111827; }
+    h1 { font-size: 3.2rem; line-height: 1.2; }
+    h2 { font-size: 2.5rem; margin-bottom: 1.5rem; text-align: center; }
+    h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    p { margin-bottom: 1rem; }
+
+    /* === LAYOUT === */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+    .section { padding: 5rem 0; }
+
+    /* === NAVIGATION === */
+    nav {
+      position: sticky; top: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+      z-index: 1000; padding: 1rem 0; border-bottom: 1px solid #e5e7eb;
+    }
+    .nav-container { display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-weight: 700; font-size: 1.5rem; color: #1d4ed8; }
+    .nav-links { display: flex; gap: 2rem; font-weight: 500; }
+    .nav-links a { position: relative; }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px;
+      background: #10b981; transition: width 0.3s ease;
+    }
+    .nav-links a:hover::after { width: 100%; }
+    .auth-buttons { display: flex; gap: 1rem; }
+    .btn {
+      padding: 0.6rem 1.2rem; border-radius: 0.5rem; font-weight: 600;
+      transition: all 0.3s ease; cursor: pointer;
+    }
+    .btn-outline { border: 2px solid #1d4ed8; color: #1d4ed8; }
+    .btn-outline:hover { background: #1d4ed8; color: white; }
+    .btn-primary {
+      background: #1d4ed8; color: white; border: none;
+      box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+    }
+    .btn-primary:hover { background: #1e40af; transform: translateY(-2px); }
+
+    /* === HERO === */
+    .hero {
+      min-height: 90vh; display: flex; align-items: center; position: relative;
+      background: linear-gradient(135deg, #dbeafe 0%, #f0fdf4 100%);
+    }
+    .hero-content { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+    .hero-text h1 { margin-bottom: 1rem; }
+    .hero-text p { font-size: 1.2rem; margin-bottom: 2rem; color: #4b5563; }
+    .hero-mockup {
+      position: relative; animation: float 6s ease-in-out infinite;
+      transform-origin: center;
+    }
+    .ai-badge {
+      position: absolute; top: 20%; right: -10%; background: #10b981; color: white;
+      padding: 0.5rem 1rem; border-radius: 2rem; font-weight: 600; font-size: 0.9rem;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); animation: pulse 2s infinite;
+    }
+
+    /* === CURVED DIVIDER === */
+    .curve-divider svg { width: 100%; height: 120px; display: block; }
+    .curve-divider path { fill: #f8fafc; }
+
+    /* === HOW IT WORKS === */
+    .steps {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;
+      margin-top: 3rem;
+    }
+    .step {
+      background: white; padding: 2rem; border-radius: 1rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center;
+      transition: transform 0.3s ease;
+    }
+    .step:hover { transform: translateY(-8px); }
+    .step img { height: 80px; margin: 0 auto 1rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+
+    /* === FEATURES === */
+    .features {
+      background: #fff; margin: 3rem 0; padding: 3rem; border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+    .feature-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;
+    }
+    .feature-item { display: flex; align-items: flex-start; gap: 1rem; }
+    .check { color: #10b981; font-size: 1.5rem; }
+
+    /* === EXAMPLE === */
+    .example {
+      background: #2698aa; color: white; border-radius: 1rem; padding: 3rem;
+      text-align: center; margin: 4rem 0;
+    }
+    .example pre {
+      background: #173168; padding: 1.5rem; border-radius: 0.5rem; text-align: left;
+      overflow-x: auto; font-size: 0.9rem; margin-top: 1rem;
+    }
+
+    /* === TRUST BADGE === */
+    .trust-badge {
+      text-align: center; margin: 3rem 0; position: relative; font-weight: 600; color: #10b981;
+    }
+    .trust-badge::after {
+      content: ''; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%);
+      width: 120px; height: 8px; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 8"><path d="M0,4 Q30,0 60,4 T120,4" stroke="%2310b981" stroke-width="3" fill="none" stroke-linecap="round"/></svg>') no-repeat center;
+      background-size: contain;
+    }
+
+    /* === FINAL CTA === */
+    .final-cta {
+      text-align: center; padding: 5rem 2rem; background: linear-gradient(135deg, #1d4ed8, #10b981);
+      color: white; border-radius: 1.5rem; margin: 4rem 0;
+    }
+    .final-cta h2 { color: white; margin-bottom: 1rem; }
+    .final-cta .btn-primary { animation: pulse 2s infinite; }
+
+    /* === FOOTER === */
+    footer {
+      background: #111827; color: #9ca3af; padding: 3rem 0; text-align: center;
+    }
+    .footer-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1rem; }
+    .social { display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; }
+    .social a { font-size: 1.5rem; color: #9ca3af; transition: color 0.3s; }
+    .social a:hover { color: #10b981; }
+
+    /* === ANIMATIONS === */
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(1deg); }
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(29, 78, 216, 0.5); }
+      70% { box-shadow: 0 0 0 12px rgba(29, 78, 216, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(29, 78, 216, 0); }
+    }
+
+    /* === UPLOAD DEMO === */
+    .upload-area {
+      border: 2px dashed #1d4ed8; border-radius: 1rem; padding: 2rem;
+      text-align: center; margin: 2rem 0; transition: all 0.3s;
+    }
+    .upload-area.dragover { background: #dbeafe; border-color: #10b981; }
+    #result { margin-top: 2rem; }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+      .hero-content { grid-template-columns: 1fr; text-align: center; }
+      h1 { font-size: 2.5rem; }
+      .nav-links, .auth-buttons { display: none; }
+      .mobile-menu { display: block; font-size: 1.5rem; cursor: pointer; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav>
+    <div class="container nav-container">
+      <div class="logo">D&D Parser</div>
+      <div class="nav-links">
+        <a href="#">Builder</a>
+        <a href="#">Resume</a>
+        <a href="#">CV</a>
+        <a href="#">Cover Letter</a>
+        <a href="#">Advice</a>
+        <a href="#">Resources</a>
+      </div>
+      <div class="auth-buttons">
+        <button class="btn btn-outline">Login</button>
+        <button class="btn btn-primary">Free Account</button>
+      </div>
+      <div class="mobile-menu">Menu</div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero section">
+    <div class="container hero-content">
+      <div class="hero-text" data-aos="fade-right">
+        <h1>Free AI Resume Parser</h1>
+        <h2 style="font-size: 2rem; color: #1d4ed8; margin: 1rem 0;">Analysis in Seconds</h2>
+        <p>Get instant insights: extract name, skills, experience, education — all in one click.</p>
+        <button class="btn btn-primary" onclick="scrollToUpload()">Parse My Resume – Free</button>
+      </div>
+      <div class="hero-mockup" data-aos="fade-left" data-aos-delay="200">
+        <img src="https://via.placeholder.com/400x550/3b82f6/ffffff?text=Resume+Mockup" alt="Resume">
+        <div class="ai-badge">AI</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CURVED DIVIDER -->
+  <div class="curve-divider">
+    <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+      <path d="M0,0 C320,100 1120,20 1440,0 L1440,120 L0,120 Z"></path>
+    </svg>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="section">
+    <div class="container">
+      <h2>How <span style="color:#1d4ed8;">D&D Parser</span> Works</h2>
+      <div class="steps">
+        <div class="step" data-aos="fade-up">
+          <img src="https://via.placeholder.com/80/10b981/ffffff?text=Upload" alt="Upload">
+          <h3>1. Upload Resume</h3>
+          <p>PDF, DOCX, TXT — any format works.</p>
+        </div>
+        <div class="step" data-aos="fade-up" data-aos-delay="200">
+          <img src="https://via.placeholder.com/80/3b82f6/ffffff?text=AI" alt="AI">
+          <h3>2. AI Extracts</h3>
+          <p>Skills, jobs, education — 98% accurate.</p>
+        </div>
+        <div class="step" data-aos="fade-up" data-aos-delay="400">
+          <img src="https://via.placeholder.com/80/10b981/ffffff?text=JSON" alt="JSON">
+          <h3>3. View Output</h3>
+          <p>Clean JSON, summary, skill cloud.</p>
+        </div>
+        <div class="step" data-aos="fade-up" data-aos-delay="600">
+          <img src="https://via.placeholder.com/80/1d4ed8/ffffff?text=Download" alt="Download">
+          <h3>4. Download</h3>
+          <p>Export as JSON, CSV, or enhanced resume.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- UPLOAD DEMO -->
+  <section class="section" id="upload-section">
+    <div class="container">
+      <div class="upload-area" id="uploadArea">
+        <p><strong>Drag & drop your resume here</strong> or click to upload</p>
+        <input type="file" id="resumeInput" accept=".pdf,.docx,.txt" style="display:none;">
+        <button class="btn btn-primary" onclick="document.getElementById('resumeInput').click()" style="margin-top:1rem;">
+          Choose File
+        </button>
+      </div>
+      <div id="result"></div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section">
+    <div class="container features">
+      <h2>Why Job Seekers Love D&D Parser</h2>
+      <div class="feature-grid">
+        <div class="feature-item"><span class="check">Check</span> <div>Supports PDF, DOCX, TXT</div></div>
+        <div class="feature-item"><span class="check">Check</span> <div>Extracts name, email, phone, skills</div></div>
+        <div class="feature-item"><span class="check">Check</span> <div>Smart skill matching (tech + soft)</div></div>
+        <div class="feature-item"><span class="check">Check</span> <div>JSON & CSV export</div></div>
+        <div class="feature-item"><span class="check">Check</span> <div>Privacy first – files deleted in 24h</div></div>
+        <div class="feature-item"><span class="check">Check</span> <div>Free first parse – no card needed</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXAMPLE OUTPUT -->
+  <section class="section">
+    <div class="container example">
+      <h3>See It in Action</h3>
+      <pre id="jsonExample">{
+  "name": "David Lopez",
+  "email": "david@example.com",
+  "phone": "+1 555-123-4567",
+  "skills": ["Python", "NLP", "React", "Leadership"],
+  "experience": [
+    { "title": "Warehouse Manager", "years": "2017-2021" }
+  ],
+  "summary": "Experienced manager with strong leadership..."
+}</pre>
+    </div>
+  </section>
+
+  <!-- TRUST BADGE -->
+  <div class="trust-badge">
+    AI Trained on Real Resumes • Backed by NLP 
+  </div>
+
+  <!-- FINAL CTA -->
+  <section class="final-cta">
+    <h2>Stop Guessing. Start Parsing.</h2>
+    <p>Join job seekers to trust and support D&D Parser.</p>
+    <button class="btn btn-primary" onclick="scrollToUpload()">Parse My Resume – Free</button>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="#">Privacy</a> | <a href="#">Terms</a> | <a href="#">Contact</a>
+      </div>
+      <p>&copy; 2025 D&D Parser. All rights reserved.</p>
+      <div class="social">
+        <a href="#">GitHub</a> <a href="#">LinkedIn</a> <a href="#">Twitter</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- AOS JS -->
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({ duration: 800, easing: 'cubic-bezier(0.25, 0.8, 0.25, 1)', once: true });
+
+    // Scroll to upload
+    function scrollToUpload() {
+      document.getElementById('upload-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // File upload demo
+    const uploadArea = document.getElementById('uploadArea');
+    const resumeInput = document.getElementById('resumeInput');
+    const result = document.getElementById('result');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event => {
+      uploadArea.addEventListener(event, preventDefaults, false);
+    });
+    function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+    ['dragenter', 'dragover'].forEach(event => {
+      uploadArea.addEventListener(event, () => uploadArea.classList.add('dragover'), false);
+    });
+    ['dragleave', 'drop'].forEach(event => {
+      uploadArea.addEventListener(event, () => uploadArea.classList.remove('dragover'), false);
+    });
+
+    uploadArea.addEventListener('drop', handleDrop, false);
+    resumeInput.addEventListener('change', handleFiles, false);
+
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      handleFiles({ target: { files } });
+    }
+
+    function handleFiles(e) {
+      const file = e.target.files[0];
+      if (file) {
+        result.innerHTML = `
+          <div style="background:white;padding:1.5rem;border-radius:1rem;margin-top:1rem;box-shadow:0 4px 20px rgba(0,0,0,0.05);">
+            <h3 style="color:#10b981;">Check Parsed Successfully!</h3>
+            <p><strong>File:</strong> ${file.name}</p>
+            <pre style="background:#f3f4f6;padding:1rem;border-radius:0.5rem;overflow:auto;">
+{
+  "name": "David Lopez",
+  "email": "david@example.com",
+  "skills": ["Python", "Leadership", "Excel"],
+  "confidence": 0.98
+}</pre>
+            <button class="btn btn-primary" style="margin-top:1rem;">Download JSON</button>
+          </div>`;
+      }
+    }
+  </script>
+</body>
+</html>
