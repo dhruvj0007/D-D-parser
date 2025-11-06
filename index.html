@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head> 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>D&D Parser – AI Resume Parser (Functional)</title>
@@ -83,7 +83,7 @@
   height: 64px;
   border-radius: 18px;
   display: grid;
-  place-items: center;
+  place-items: center; 
   background: #eff6ff;
 }
 
@@ -305,6 +305,11 @@
     /* accessible focus style */
     .social-item:focus { box-shadow: 0 0 0 3px rgba(16,185,129,0.12); border-radius: 8px; }
 
+  /* Batch comparison table styling */
+  .match-high { background: #d1fae5; }
+  .match-high td { border-color: #10B981 !important; }
+  #comparisonTable th { cursor: pointer; }
+
     /* Animations */
     @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(1deg); } }
     @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(29, 78, 216, 0.5); } 70% { box-shadow: 0 0 0 12px rgba(29, 78, 216, 0); } 100% { box-shadow: 0 0 0 0 rgba(29, 78, 216, 0); } }
@@ -313,6 +318,11 @@
     .upload-area { border: 2px dashed #1d4ed8; border-radius: 1rem; padding: 2rem; text-align: center; margin: 2rem 0; transition: all 0.3s; }
     .upload-area.dragover { background: #dbeafe; border-color: #10b981; }
     #result { margin-top: 2rem; }
+
+  /* Selected files display */
+  #fileNameDisplay { color: #10B981; font-weight: 600; margin-top: 1rem; }
+  #clearFiles { background: transparent; border: 1px solid #3B82F6; color: #3B82F6; padding: 0.45rem 0.75rem; border-radius: 8px; cursor: pointer; }
+  #clearFiles:hover { background: #3B82F6; color: white; }
 
     .hr-input-container {
       margin-bottom: 1.5rem; background: #fff; padding: 2rem; border-radius: 1rem;
@@ -358,6 +368,17 @@
 .hero .stagger.show > *:nth-child(1) { transition-delay: 120ms; }
 .hero .stagger.show > *:nth-child(2) { transition-delay: 240ms; }
 .hero .stagger.show > *:nth-child(3) { transition-delay: 360ms; }
+
+  /* --- See It In Action split view for single result --- */
+  .results-split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  .json-panel { background: linear-gradient(180deg,#eff6ff,#dbeafe); border:1px solid #3B82F6; border-radius:8px; padding:12px; overflow:auto; }
+  .json-panel h4 { margin:0 0 8px 0; color:#1e3a8a; }
+  .json-code { background:#0f1724; color:#e6eef8; padding:12px; border-radius:6px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace; font-size:0.9rem; white-space:pre; overflow:auto; }
+  .table-panel { background:#ffffff; border:1px solid #e6f4ea; border-radius:8px; padding:12px; }
+  .table-panel h4 { margin:0 0 8px 0; color:#065f46; }
+  #single-table { width:100%; border-collapse:collapse; display:none; }
+  #single-table th, #single-table td { padding:0.6rem; border:1px solid #e6eefc; text-align:left; }
+  @media (max-width: 768px) { .results-split { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -389,7 +410,7 @@
   <section class="hero section">
     <div class="container hero-content">
       <div class="hero-text" data-aos="fade-right">
-        <h1>Free AI Resume Parser</h1>
+        <h1>Free Resume Parser</h1>
         <h2 style="font-size: 2rem; color: #1d4ed8; margin: 1rem 0;">Analysis in Seconds</h2>
         <p>Get instant insights: extract name, skills, experience, education — all in one click.</p>
         <button class="btn btn-primary" onclick="scrollToUpload()">Parse My Resume – Free</button>
@@ -421,9 +442,9 @@
           </g>
           <!-- green circular AI badge -->
           <circle cx="300" cy="380" r="36" fill="#10b981" stroke="#0ea36c" stroke-width="4"/>
-          <text x="300" y="388" font-family="Inter, sans-serif" font-weight="700" font-size="20" text-anchor="middle" fill="#fff">AI</text>
+          <text x="300" y="388" font-family="Inter, sans-serif" font-weight="700" font-size="20" text-anchor="middle" fill="#fff"></text>
         </svg>
-        <div class="ai-badge">AI</div>
+        <div class="ai-badge"></div>
       </div>
     </div>
   </section>
@@ -542,8 +563,15 @@
             <button type="button" class="btn btn-primary" onclick="document.getElementById('resumeInput').click()" style="margin-top:0.25rem;">
               Choose Resume File
             </button>
+            <label style="margin-top:0.5rem; font-size:0.95rem; color:#374151; display:flex; flex-direction:column; gap:0.5rem; align-items:flex-start;">
+              <div style="display:flex; gap:0.5rem; align-items:center;">
+                <input type="checkbox" id="batchToggle" aria-label="Enable batch mode (up to 5 resumes)"> <strong> Batch mode (compare up to 5)</strong>
+              </div>
+              <!-- NOTE: Removed the secondary HR skills textarea (Step 2). Use the Step 1 input above for required skills. -->
+            </label>
           </div>
-          <p id="fileNameDisplay" style="margin-top: 1rem; color: #1d4ed8; font-weight: 500;"></p>
+          <p id="fileNameDisplay" style="margin-top: 1rem; color: #10B981; font-weight: 600;"> </p>
+          <button type="button" id="clearFiles" class="btn btn-outline" style="display:none; margin-top:0.5rem;">Clear Files</button>
         </div>
 
         <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.2rem; margin-top: 1rem; background: #10b981; border: none; animation: pulse 2s infinite;">
@@ -552,6 +580,33 @@
       </form>
 
       <div id="result"></div>
+      <!-- Comparison view for batch results -->
+      <div id="comparisonView" style="display:none; margin-top:1.5rem;">
+        <div style="background:white; padding:1rem; border-radius:0.75rem; box-shadow:0 8px 24px rgba(0,0,0,0.06);">
+          <h3 style="color:#1d4ed8; margin-bottom:0.5rem;">Batch Comparison Results</h3>
+          <div id="comparisonSummary" style="margin-bottom:1rem; color:#374151;"></div>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:0.5rem;">
+            <div style="font-size:0.95rem; color:#374151;">Compare resumes against provided required skills. Use Export to save CSV.</div>
+            <div style="display:flex; gap:8px;">
+              <button id="exportCsvBtn" class="btn btn-outline" style="font-size:0.9rem;">Export CSV</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table id="comparisonTable" style="width:100%; border-collapse:collapse;">
+              <thead>
+                <tr style="background:#eff6ff;">
+                  <th data-col="candidate" style="padding:0.6rem; border:1px solid #e6eefc; text-align:left; cursor:pointer;">Candidate</th>
+                  <th data-col="required" style="padding:0.6rem; border:1px solid #e6eefc; text-align:left; cursor:pointer;">Required Skills</th>
+                  <th data-col="matched" style="padding:0.6rem; border:1px solid #e6eefc; text-align:left; cursor:pointer;">Matched Skills</th>
+                  <th data-col="pct" style="padding:0.6rem; border:1px solid #e6eefc; text-align:left; cursor:pointer;">Match %</th>
+                  <th data-col="selected" style="padding:0.6rem; border:1px solid #e6eefc; text-align:left;">Selected</th>
+                </tr>
+              </thead>
+              <tbody id="comparisonBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
       <div id="loadingSpinner" style="display: none; text-align: center; margin-top: 2rem;">
         <!-- Inline spinner -->
@@ -572,7 +627,7 @@
       <h2>Why Job Seekers Love D&D Parser</h2>
       <div class="feature-grid">
         <div class="feature-item"><span class="check">✓</span> <div>Supports PDF, DOCX, TXT</div></div>
-        <div class="feature-item"><span class="check">✓</span> <div>Extracts name, email, phone, skills</div></div>
+        <div class="feature-item"><span class="check">✓</span> <div>Extracts skills and Key Data for Comparison</div></div>
         <div class="feature-item"><span class="check">✓</span> <div>Smart skill matching (tech + soft)</div></div>
         <div class="feature-item"><span class="check">✓</span> <div>JSON &amp; CSV export</div></div>
         <div class="feature-item"><span class="check">✓</span> <div>Privacy first – files deleted in 24h</div></div>
@@ -749,42 +804,155 @@
     uploadArea.addEventListener('drop', handleDrop, false);
     resumeInput.addEventListener('change', handleFiles, false);
 
+    const batchToggleEl = document.getElementById('batchToggle');
+    const clearBtn = document.getElementById('clearFiles');
+
+    // Ensure the input allows multiple selection only when batch mode is enabled
+    if (batchToggleEl) {
+      batchToggleEl.addEventListener('change', (ev) => {
+        const checked = !!ev.target.checked;
+        resumeInput.multiple = checked;
+        // When switching out of batch mode, clear any multi-selection to avoid accidental multi-submits
+        if (!checked) {
+          resumeInput.value = '';
+          fileNameDisplay.textContent = '';
+          window._selectedFiles = [];
+          if (clearBtn) clearBtn.style.display = 'none';
+        }
+      }, false);
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        resumeInput.value = '';
+        fileNameDisplay.textContent = '';
+        window._selectedFiles = [];
+        clearBtn.style.display = 'none';
+      }, false);
+    }
+
     function handleDrop(e) {
       const dt = e.dataTransfer;
       if (!dt || !dt.files || dt.files.length === 0) return;
       resumeInput.files = dt.files;
       handleFiles({ target: resumeInput });
     }
+    function renderSelectedFiles() {
+      const sel = window._selectedFiles || [];
+      const isBatch = batchToggleEl && batchToggleEl.checked;
+      if (!sel.length) {
+        fileNameDisplay.textContent = '';
+        if (clearBtn) clearBtn.style.display = 'none';
+        return;
+      }
+
+      if (isBatch) {
+        // show names and provide a remove button per file
+        function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+        const namesHtml = sel.map(f => `<span style="display:inline-block;margin-right:8px;padding:3px 6px;border-radius:6px;background:#f1f5f9;">${esc(f.name)} <button type="button" class="remove-single" data-name="${esc(f.name)}" style="background:transparent;border:none;color:#3B82F6;cursor:pointer;padding:0;margin-left:6px;font-weight:700;">✕</button></span>`).join(' ');
+        fileNameDisplay.innerHTML = `Files Selected (${sel.length}/5): ${namesHtml}`;
+        if (clearBtn) clearBtn.style.display = 'inline-block';
+        // attach remove handlers
+        document.querySelectorAll('.remove-single').forEach(btn => {
+          btn.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            const name = btn.getAttribute('data-name');
+            removeSelectedFile(name);
+          }, false);
+        });
+      } else {
+        fileNameDisplay.textContent = `File Selected: ${sel[0].name}`;
+        if (clearBtn) clearBtn.style.display = 'inline-block';
+      }
+    }
+
+    // Remove a file from the stored selection by name
+    function removeSelectedFile(name) {
+      const sel = window._selectedFiles || [];
+      window._selectedFiles = sel.filter(f => f.name !== name);
+      renderSelectedFiles();
+    }
+
     function handleFiles(e) {
-      const file = e.target.files && e.target.files[0];
-      fileNameDisplay.textContent = file ? 'File Selected: ' + file.name : '';
+      const incoming = e.target.files ? Array.from(e.target.files) : [];
+      const isBatch = batchToggleEl && batchToggleEl.checked;
+      if (!incoming.length) {
+        return;
+      }
+
+      if (isBatch) {
+        // append deduped to stored selection
+        let existing = window._selectedFiles && Array.isArray(window._selectedFiles) ? window._selectedFiles.slice() : [];
+        incoming.forEach(f => {
+          if (!existing.some(s => s.name === f.name)) existing.push(f);
+        });
+        if (existing.length > 5) {
+          alert('Max 5 files allowed for batch analysis — extra files will be ignored.');
+          existing = existing.slice(0, 5);
+        }
+        window._selectedFiles = existing;
+        renderSelectedFiles();
+      } else {
+        // single mode: replace with the first selected file
+        window._selectedFiles = [incoming[0]];
+        renderSelectedFiles();
+      }
     }
 
     uploadForm.addEventListener('submit', async (event) => {
       event.preventDefault();
 
+      // Use only the Step 1 HR skills input (`#hr_skills_input`) as the canonical source.
       if (!hrSkillsInput.value.trim()) { alert('Please enter the required HR Skills.'); return; }
-      if (!resumeInput.files.length) { alert('Please select a resume file first.'); return; }
 
-      const formData = new FormData(uploadForm);
+      // Files may be stored in resumeInput.files (single selection) or window._selectedFiles (batch cumulative selection)
+      const selectedFilesCount = (window._selectedFiles && window._selectedFiles.length) ? window._selectedFiles.length : (resumeInput.files && resumeInput.files.length ? resumeInput.files.length : 0);
+      if (selectedFilesCount === 0) { alert('Please select a resume file first.'); return; }
+
+      const isBatch = document.getElementById('batchToggle')?.checked;
+
       resultDiv.innerHTML = '';
+      document.getElementById('comparisonView').style.display = 'none';
       loadingSpinner.style.display = 'block';
       document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       try {
-        // Match your backend route
-        const response = await fetch('http://127.0.0.1:5000/upload', {
-          method: 'POST',
-          body: formData
-        });
+        if (isBatch) {
+          // Batch path: build custom FormData and POST to /batch-analyze
+          let files = (window._selectedFiles && window._selectedFiles.length) ? window._selectedFiles.slice() : Array.from(resumeInput.files || []);
+          if (!files || files.length === 0) { alert('Please select at least one resume for batch analysis.'); return; }
+          if (files.length > 5) { alert('Max 5 files allowed for batch analysis — extra files will be ignored.'); files = files.slice(0,5); }
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: 'Server error or invalid response format.' }));
-          throw new Error('API Request Failed: ' + response.status + ' - ' + (errorData.message || 'Unknown Error'));
+          const fd = new FormData();
+          // include hr_skills from Step 1 (canonical input)
+          fd.append('hr_skills', hrSkillsInput.value.trim());
+          files.forEach((f) => fd.append('files[]', f, f.name));
+
+          const response = await fetch('http://127.0.0.1:5000/batch-analyze', { method: 'POST', body: fd });
+          if (!response.ok) {
+            const err = await response.json().catch(() => ({ message: 'Server error' }));
+            throw new Error(err.message || 'Batch request failed');
+          }
+          const data = await response.json();
+          displayBatchResult(data);
+        } else {
+          // Single-file path: preserve existing behavior
+          const formData = new FormData(uploadForm);
+          // ensure the HR skills value from Step 1 is included
+          formData.set('hr_skills', hrSkillsInput.value.trim());
+          const response = await fetch('http://127.0.0.1:5000/upload', {
+            method: 'POST',
+            body: formData
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: 'Server error or invalid response format.' }));
+            throw new Error('API Request Failed: ' + response.status + ' - ' + (errorData.message || 'Unknown Error'));
+          }
+
+          const data = await response.json();
+          displayResult(data);
         }
-
-        const data = await response.json();
-        displayResult(data);
       } catch (error) {
         console.error('Submission Error:', error);
         resultDiv.innerHTML = `
@@ -799,25 +967,127 @@
       }
     });
 
+    function displayBatchResult(data) {
+      // data.parsed = [{candidate, text_snippet, top_tokens}], data.comparisons.similarity_matrix
+      const tableBody = document.getElementById('comparisonBody');
+      const summary = document.getElementById('comparisonSummary');
+      tableBody.innerHTML = '';
+      summary.textContent = `Common tokens across resumes: ${ (data.comparisons && data.comparisons.common_skills && data.comparisons.common_skills.length) ? data.comparisons.common_skills.join(', ') : 'None' }`;
+
+      // keep a copy of last batch for sorting/export
+      window._lastBatch = data;
+
+      function renderRows(rows) {
+        tableBody.innerHTML = '';
+        rows.forEach(p => {
+          const pct = (p.match_pct !== undefined) ? Number(p.match_pct) : 0;
+          const pctBar = `<svg width="120" height="12" style="background:#eef2ff; border-radius:6px; overflow:visible;"><rect x="0" y="1" width="120" height="10" rx="6" fill="#eef2ff"></rect><rect x="0" y="1" width="${Math.round(Math.max(0,Math.min(1,pct/100))*120)}" height="10" rx="6" fill="${pct>=80? '#10B981': (pct>=50? '#3B82F6':'#9CA3AF')}"></rect></svg>`;
+          const tr = document.createElement('tr');
+          if (pct >= 80) tr.className = 'match-high';
+          tr.innerHTML = `
+            <td style="padding:0.6rem; border:1px solid #e6eefc; vertical-align:top;">${p.candidate}</td>
+            <td style="padding:0.6rem; border:1px solid #e6eefc; vertical-align:top;">${(p.required_skills || []).join(', ')}</td>
+            <td style="padding:0.6rem; border:1px solid #e6eefc; vertical-align:top;">${(p.matched_skills || []).join(', ')}</td>
+            <td style="padding:0.6rem; border:1px solid #e6eefc; vertical-align:top;">${pctBar} <span style="margin-left:8px; font-weight:600;">${pct.toFixed(1)}%</span></td>
+            <td style="padding:0.6rem; border:1px solid #e6eefc; vertical-align:top; text-align:center;"> <input type="checkbox" data-candidate="${p.candidate}" ${p.selected ? 'checked' : ''}/> </td>
+          `;
+          tableBody.appendChild(tr);
+        });
+      }
+
+      renderRows(data.parsed || []);
+
+      // sortable headers
+      document.querySelectorAll('#comparisonTable thead th[data-col]').forEach(th => {
+        th.style.userSelect = 'none';
+        th.onclick = () => {
+          const col = th.getAttribute('data-col');
+          const rows = (window._lastBatch && window._lastBatch.parsed) ? window._lastBatch.parsed.slice() : [];
+          rows.sort((a,b) => {
+            if (col === 'pct') return (b.match_pct||0) - (a.match_pct||0);
+            if (col === 'candidate') return a.candidate.localeCompare(b.candidate);
+            if (col === 'required') return ( (b.required_skills||[]).length - (a.required_skills||[]).length );
+            if (col === 'matched') return ( (b.matched_skills||[]).length - (a.matched_skills||[]).length );
+            return 0;
+          });
+          renderRows(rows);
+        };
+      });
+
+      // export CSV
+      document.getElementById('exportCsvBtn').onclick = () => {
+        const rows = (window._lastBatch && window._lastBatch.parsed) ? window._lastBatch.parsed : [];
+        const csv = ['Candidate,Required Skills,Matched Skills,Match %,Selected'];
+        rows.forEach(r => {
+          const line = `"${r.candidate}","${(r.required_skills||[]).join('; ')}","${(r.matched_skills||[]).join('; ')}",${r.match_pct||0},${r.selected? 'TRUE':'FALSE'}`;
+          csv.push(line);
+        });
+        const blob = new Blob([csv.join('\n')], {type:'text/csv'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'batch_matches.csv';
+        a.click();
+      };
+
+      document.getElementById('comparisonView').style.display = 'block';
+      document.getElementById('comparisonView').scrollIntoView({behavior:'smooth'});
+    }
+
+    function renderSimBar(score, cls, pct) {
+      const color = score >= 0.75 ? '#10B981' : (score >= 0.5 ? '#3B82F6' : '#9CA3AF');
+      const width = Math.round(Math.max(0, Math.min(1, score)) * 100);
+      return `<div style="display:flex; align-items:center; gap:8px;"><svg width="120" height="12" style="background:#eef2ff; border-radius:6px; overflow:visible;" role="img" aria-label="Similarity ${pct}%"><rect x="0" y="1" width="120" height="10" rx="6" fill="#eef2ff"></rect><rect x="0" y="1" width="${width * 1.2}" height="10" rx="6" fill="${color}"></rect></svg><span style="min-width:36px; color:#374151; font-weight:600;">${pct}%</span></div>`;
+    }
+
     function displayResult(data) {
+      // populate the result preview areas: left JSON panel and right quick table
       const jsonString = JSON.stringify(data, null, 2);
-      resultDiv.innerHTML = `
-        <div style="background:white; padding:2rem; border-radius:1rem; margin-top:2rem; box-shadow:0 10px 30px rgba(0,0,0,0.1);">
-          <h2 style="color:#10b981; margin-bottom: 1.5rem;">
-            🎉 Analysis Complete
-            <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-left: 0.5rem; opacity: 0.8;" role="img" aria-labelledby="ico-done">
-              <title id="ico-done">Completion Icon</title>
-              <circle cx="15" cy="20" r="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
-              <circle cx="25" cy="20" r="10" fill="#f8fafc" stroke="#1d4ed8" stroke-width="2"/>
-            </svg>
-          </h2>
-          <h3 style="color:#1d4ed8;">Extracted Data (JSON)</h3>
-          <pre style="background:#f3f4f6; padding:1.5rem; border-radius:0.5rem; overflow:auto; font-size:0.9rem; white-space: pre-wrap;">${jsonString}</pre>
-          <button class="btn btn-primary" style="margin-top:1.5rem; background: #1d4ed8;" onclick="copyResult()">Copy JSON</button>
-          <button class="btn btn-primary" style="margin-top:1.5rem; background: #10b981;" onclick="scrollToUpload()">Analyze Another Resume</button>
-        </div>
-      `;
-      // visual delight: confetti burst + mockup glow
+      try { document.getElementById('jsonExample').textContent = jsonString; } catch (e) { /* ignore */ }
+
+      // Build quick single-row table using HR skills from the canonical input if provided
+      try {
+        const requiredRaw = (hrSkillsInput && hrSkillsInput.value && hrSkillsInput.value.trim()) ? hrSkillsInput.value.trim() : '';
+        let required = [];
+        if (requiredRaw) {
+          required = requiredRaw.split(',').map(s => s.trim()).filter(Boolean);
+        } else if (data.skills && Array.isArray(data.skills) && data.skills.length) {
+          // fallback: use top 3 extracted skills
+          required = data.skills.slice(0, 3);
+        }
+
+        const resumeSkills = (data.skills && Array.isArray(data.skills)) ? data.skills.map(s => String(s).toLowerCase()) : [];
+        const reqLower = required.map(r => String(r).toLowerCase());
+        const matched = reqLower.filter(r => resumeSkills.includes(r));
+        const pct = required.length ? (matched.length / required.length * 100) : 0;
+        const selected = pct >= 80;
+
+        const pctBar = `<svg width="120" height="12" style="background:#eef2ff; border-radius:6px; overflow:visible; vertical-align:middle;"><rect x="0" y="1" width="120" height="10" rx="6" fill="#eef2ff"></rect><rect x="0" y="1" width="${Math.round(Math.max(0,Math.min(1,pct/100))*120)}" height="10" rx="6" fill="${pct>=80? '#10B981': (pct>=50? '#3B82F6':'#9CA3AF')}"></rect></svg>`;
+
+        const tr = document.createElement('tr');
+        if (selected) tr.className = 'match-high';
+        tr.innerHTML = `
+          <td>${data.candidate || (window._selectedFiles && window._selectedFiles[0] && window._selectedFiles[0].name) || 'Resume'}</td>
+          <td>${(required || []).join(', ')}</td>
+          <td>${(matched || []).join(', ')}</td>
+          <td>${pctBar} <span style="margin-left:8px; font-weight:600;">${pct.toFixed(1)}%</span></td>
+          <td style="text-align:center;"><input type="checkbox" ${selected ? 'checked' : ''} disabled></td>
+        `;
+        const tbody = document.getElementById('single-tbody');
+        if (tbody) {
+          tbody.innerHTML = '';
+          tbody.appendChild(tr);
+          const tbl = document.getElementById('single-table'); if (tbl) tbl.style.display = 'table';
+        }
+
+        // hide batch comparison view when showing single split
+        const comp = document.getElementById('comparisonView'); if (comp) comp.style.display = 'none';
+        // scroll See It in Action into view
+        const see = document.querySelector('.example'); if (see) see.scrollIntoView({behavior:'smooth'});
+      } catch (e) {
+        console.error('Render single table failed', e);
+      }
+
+      // visual delight: confetti + mockup glow
       try { confettiBurst(); document.querySelector('.resume-mockup-svg')?.classList.add('glow'); setTimeout(()=>document.querySelector('.resume-mockup-svg')?.classList.remove('glow'), 1800); } catch(e){/*fail silently*/}
     }
 
